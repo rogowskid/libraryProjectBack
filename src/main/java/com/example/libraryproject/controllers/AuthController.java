@@ -2,6 +2,7 @@ package com.example.libraryproject.controllers;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,7 @@ import javax.validation.Valid;
 
 import com.example.libraryproject.Models.ERole;
 import com.example.libraryproject.Models.Role;
+import com.example.libraryproject.Models.UStatus;
 import com.example.libraryproject.Models.User;
 import com.example.libraryproject.Repository.RoleRepository;
 import com.example.libraryproject.Repository.UserRepository;
@@ -57,6 +59,14 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        Optional<User> user = userRepository.findByUsername(loginRequest.getUsername());
+        if(user.get().getStatus() == UStatus.STATUS_INACTIVE)
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("User is blocked!"));
+
+
         String jwt = jwtUtils.generateJwtToken(authentication);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -73,16 +83,17 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+                    .body(new MessageResponse("Error: Wybrany login już istnieje!!"));
         }
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+                    .body(new MessageResponse("Error: Wybrany email już istnieje!"));
         }
 
         // Create new user's account
@@ -123,7 +134,9 @@ public class AuthController {
         user.setRoles(roles);
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse("Poprawnie dodano użytkownika"));
     }
 
 }

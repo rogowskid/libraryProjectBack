@@ -17,7 +17,7 @@ public class BorrowBookController {
     }
 
     @GetMapping("/book/{idBook}")
-    @PreAuthorize("hasRole('MODERATOR')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> addBook(@PathVariable String idBook)
     {
         return borrowBookService.addBorrowBook(Long.valueOf(idBook));

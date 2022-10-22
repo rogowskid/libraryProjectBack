@@ -1,7 +1,9 @@
 package com.example.libraryproject.services;
 
 import com.example.libraryproject.Models.Book;
+import com.example.libraryproject.Models.ERole;
 import com.example.libraryproject.Repository.BookRepository;
+import com.example.libraryproject.Repository.UserRepository;
 import com.example.libraryproject.payload.response.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -37,7 +40,7 @@ public class BookService {
             Book id = bookRepository.findByISBN(book.getISBN()).orElseThrow(() -> null);
             if (id.getBookName().equals(book.getBookName()) && id.getAuthor().equals(book.getAuthor()) && id.getYearOfPublication() == book.getYearOfPublication()) {
 
-                bookRepository.addBookCapacity(1, id.getIdBook());
+                bookRepository.addBookCapacity(book.getCapacity(), id.getIdBook());
                 return ResponseEntity
                         .ok()
                         .body(new MessageResponse("Copy of book added successfully!"));
@@ -63,6 +66,11 @@ public class BookService {
 
     public List<Book> getBooks(int capacity) {
         return bookRepository.findByCapacityGreaterThan(capacity);
+    }
+
+    public List<Book> getFilterBooks(String name)
+    {
+        return bookRepository.findByBookNameContainsIgnoreCase(name);
     }
 
 

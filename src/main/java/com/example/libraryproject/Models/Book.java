@@ -41,7 +41,7 @@ public class Book {
     private int capacity;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "book")
-    private List<BookBorrow> booksBorrowList;
+    private List<BorrowBook> booksBorrowList;
 
     public Book(String bookName, String author, int yearOfPublication, String ISBN) {
         this.bookName = bookName;

@@ -16,7 +16,6 @@ public class BookController {
 
 
     private final BookService bookService;
-
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
@@ -26,24 +25,34 @@ public class BookController {
      * Zwraca książki bez podziału na wypożyczenia
      * */
     @GetMapping("/allbooks")
-    @PreAuthorize("hasRole('USER')")
     public List<Book> getBooks()
     {
         return bookService.getBooks();
     }
 
+    @GetMapping("/filterbook/{bookName}")
+    public List<Book> getFilterBooks(@PathVariable String bookName ){
+
+        if (bookName.isEmpty())
+            return bookService.getBooks(0);
+
+        return bookService.getFilterBooks(bookName);
+
+    }
+
     @GetMapping("/books")
-    @PreAuthorize("hasRole('MODERATOR')")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public List<Book> getAccessBooks()
     {
         return bookService.getBooks(0);
     }
     @PostMapping("/addbook")
-    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR')")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<?> addBook(@RequestBody Book book)
     {
         return bookService.addBook(book);
     }
+
 
 
 

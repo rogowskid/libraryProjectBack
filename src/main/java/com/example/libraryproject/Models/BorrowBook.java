@@ -5,8 +5,8 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "bookBorrow")
-public class BookBorrow {
+@Table(name = "borrowBook")
+public class BorrowBook {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,7 +27,7 @@ public class BookBorrow {
     private LocalDate dateReturnBook;
 
 
-    public BookBorrow(User user, Book book, LocalDate dateBorrowBook, LocalDate dateReturnBook) {
+    public BorrowBook(User user, Book book, LocalDate dateBorrowBook, LocalDate dateReturnBook) {
         this.user = user;
         this.book = book;
         this.dateBorrowBook = dateBorrowBook;
@@ -35,7 +35,7 @@ public class BookBorrow {
     }
 
 
-    public BookBorrow() {
+    public BorrowBook() {
 
     }
 

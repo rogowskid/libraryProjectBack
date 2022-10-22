@@ -1,12 +1,15 @@
 package com.example.libraryproject.Models;
 
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 @Entity
 @Table(name = "users",
@@ -32,6 +35,10 @@ public class User {
     @Size(max = 120)
     private String password;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private UStatus status;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(  name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -40,7 +47,7 @@ public class User {
 
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<BookBorrow> booksBorrowList;
+    private List<BorrowBook> booksBorrowList;
 
 
 
@@ -48,10 +55,19 @@ public class User {
     public User() {
     }
 
+    public UStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UStatus status) {
+        this.status = status;
+    }
+
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.status = UStatus.STATUS_ACTIVE;
     }
 
     public Long getId() {
