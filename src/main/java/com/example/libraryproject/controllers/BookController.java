@@ -1,6 +1,7 @@
 package com.example.libraryproject.controllers;
 
 import com.example.libraryproject.Models.Book;
+import com.example.libraryproject.Models.CategoryBook;
 import com.example.libraryproject.services.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,6 +52,30 @@ public class BookController {
     public ResponseEntity<?> addBook(@RequestBody Book book)
     {
         return bookService.addBook(book);
+    }
+
+    @GetMapping("/book/{idbook}")
+    public Book getBook(@PathVariable Long idbook)
+    {
+        return bookService.getBook(idbook);
+    }
+
+    @GetMapping("/getallcategories")
+    public List<CategoryBook> getCategoriesBook()
+    {
+        return bookService.getCategoriesBookName();
+    }
+
+    @GetMapping("/book/categories/{categoryName}")
+    public List<Book> getBookByCategories(@PathVariable String categoryName)
+    {
+        return bookService.getBooksByCategory(categoryName);
+    }
+
+    @GetMapping("/book/filterbook/{categoryName}/{name}")
+    public List<Book> getBookByCategories(@PathVariable String categoryName, @PathVariable String name)
+    {
+        return bookService.getFilterBooksByCategory(categoryName, name);
     }
 
 

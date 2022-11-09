@@ -70,6 +70,14 @@ public class User {
         this.status = UStatus.STATUS_ACTIVE;
     }
 
+    public User(String username, String email, String password, UStatus status, Set<Role> roles) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.status = status;
+        this.roles = roles;
+    }
+
     public Long getId() {
         return id;
     }

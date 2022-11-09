@@ -43,6 +43,12 @@ public class Book {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "book")
     private List<BorrowBook> booksBorrowList;
 
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "idCategoryBook")
+    private CategoryBook categoryBook;
+
+
     public Book(String bookName, String author, int yearOfPublication, String ISBN) {
         this.bookName = bookName;
         this.author = author;
@@ -57,6 +63,15 @@ public class Book {
         this.yearOfPublication = yearOfPublication;
         this.ISBN = ISBN;
         this.capacity = capacity;
+    }
+
+    public Book(String bookName, String author, int yearOfPublication, String ISBN, CategoryBook categoryBook) {
+        this.bookName = bookName;
+        this.author = author;
+        this.yearOfPublication = yearOfPublication;
+        this.ISBN = ISBN;
+        this.capacity = 1;
+        this.categoryBook = categoryBook;
     }
 
     public Book() {
@@ -110,4 +125,6 @@ public class Book {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
+
+
 }

@@ -38,12 +38,12 @@ public class BorrowBookService {
         if (book == null)
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("The book does not exist!"));
+                    .body(new MessageResponse("Taka książka nie istnieje!"));
 
         if (book.getCapacity() < 1)
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("No copy of the book"));
+                    .body(new MessageResponse("Brak dostępnych egzemplarzy"));
 
         User user = userRepository.findByUsername(sessionComponent.getSessionUserLogin()).orElseThrow(() -> null);
         if (user != null) {
@@ -53,7 +53,7 @@ public class BorrowBookService {
 
         return ResponseEntity
                 .ok()
-                .body(new MessageResponse("Success! You just borrowed a book."));
+                .body(new MessageResponse("Brawo! Udało Ci się wypożyczyć książke."));
 
     }
 

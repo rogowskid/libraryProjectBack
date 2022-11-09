@@ -21,9 +21,17 @@ public class UserController {
 
 
     @GetMapping("/allusers/{role}")
-    @PreAuthorize("hasRole('MODERATOR')")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     public List<User> getUsers(@PathVariable String role)
     {
         return userService.getUsersByRole(role);
     }
+
+    @GetMapping("/changestatus/{idUser}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    public void changeStatusUser(@PathVariable Long idUser)
+    {
+        userService.changeStatus(idUser);
+    }
+
 }

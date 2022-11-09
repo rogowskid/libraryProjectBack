@@ -64,7 +64,7 @@ public class AuthController {
         if(user.get().getStatus() == UStatus.STATUS_INACTIVE)
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("User is blocked!"));
+                    .body(new MessageResponse("Użytkownik jest zablokowany! Skontaktuj się z administratrem"));
 
 
         String jwt = jwtUtils.generateJwtToken(authentication);

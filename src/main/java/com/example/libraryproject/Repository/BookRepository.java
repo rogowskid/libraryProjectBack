@@ -1,6 +1,7 @@
 package com.example.libraryproject.Repository;
 
 import com.example.libraryproject.Models.Book;
+import com.example.libraryproject.Models.CategoryBook;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,6 +24,7 @@ public interface BookRepository extends JpaRepository <Book, Long> {
     List<Book> findByBookNameContainsIgnoreCase(String name);
     List<Book> findByCapacityGreaterThan(int capacity);
 
+    List<Book> findByCategoryBook(CategoryBook categoryBook);
 
     @Modifying
     @Transactional
