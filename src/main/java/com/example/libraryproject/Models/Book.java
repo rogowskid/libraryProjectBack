@@ -1,6 +1,7 @@
 package com.example.libraryproject.Models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.Range;
 
@@ -8,6 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
@@ -15,7 +17,7 @@ import java.util.List;
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "ISBN")
         })
-public class Book {
+public class Book implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idBook;
@@ -40,11 +42,16 @@ public class Book {
     @Range(min=0, max=4000)
     private int capacity;
 
+
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "book")
     private List<BorrowBook> booksBorrowList;
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
+
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idCategoryBook")
     private CategoryBook categoryBook;
 
@@ -71,6 +78,15 @@ public class Book {
         this.yearOfPublication = yearOfPublication;
         this.ISBN = ISBN;
         this.capacity = 1;
+        this.categoryBook = categoryBook;
+    }
+
+    public Book(String bookName, String author, int yearOfPublication, String ISBN, int capacity, CategoryBook categoryBook) {
+        this.bookName = bookName;
+        this.author = author;
+        this.yearOfPublication = yearOfPublication;
+        this.ISBN = ISBN;
+        this.capacity = capacity;
         this.categoryBook = categoryBook;
     }
 
@@ -125,6 +141,11 @@ public class Book {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
+    public CategoryBook getCategoryBook() {
+        return categoryBook;
+    }
 
-
+    public void setCategoryBook(CategoryBook categoryBook) {
+        this.categoryBook = categoryBook;
+    }
 }

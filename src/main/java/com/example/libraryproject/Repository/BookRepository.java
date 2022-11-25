@@ -34,6 +34,6 @@ public interface BookRepository extends JpaRepository <Book, Long> {
     @Modifying
     @Transactional
     @Query(value = "update Book set capacity = capacity - ?1 where idBook=?2")
-    void setBorrowBOok(int capacity, Long idBook);
+    void setBorrowBook(int capacity, Long idBook);
 
 }

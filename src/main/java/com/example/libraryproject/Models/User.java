@@ -35,15 +35,21 @@ public class User {
     @Size(max = 120)
     private String password;
 
+    @NotBlank
+    @Size(max = 30)
+    private String userFirstName;
+
+    @NotBlank
+    @Size(max =40 )
+    private String userSecondName;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     private UStatus status;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(  name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "idRole")
+    private Role role;
 
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
@@ -70,16 +76,41 @@ public class User {
         this.status = UStatus.STATUS_ACTIVE;
     }
 
-    public User(String username, String email, String password, UStatus status, Set<Role> roles) {
+    public User(String username, String email, String password, String userFirstName, String userSecondName) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.userFirstName = userFirstName;
+        this.userSecondName = userSecondName;
+        this.status = UStatus.STATUS_ACTIVE;
+    }
+
+    public User(String username, String email, String password, UStatus status, Role role) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.status = status;
-        this.roles = roles;
+        this.role = role;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public String getUserFirstName() {
+        return userFirstName;
+    }
+
+    public void setUserFirstName(String userFirstName) {
+        this.userFirstName = userFirstName;
+    }
+
+    public String getUserSecondName() {
+        return userSecondName;
+    }
+
+    public void setUserSecondName(String userSecondName) {
+        this.userSecondName = userSecondName;
     }
 
     public void setId(Long id) {
@@ -110,11 +141,11 @@ public class User {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

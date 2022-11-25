@@ -1,13 +1,5 @@
 package com.example.libraryproject.controllers;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
 import com.example.libraryproject.Models.ERole;
 import com.example.libraryproject.Models.Role;
 import com.example.libraryproject.Models.UStatus;
@@ -27,11 +19,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -61,7 +56,7 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         Optional<User> user = userRepository.findByUsername(loginRequest.getUsername());
-        if(user.get().getStatus() == UStatus.STATUS_INACTIVE)
+        if (user.get().getStatus() == UStatus.STATUS_INACTIVE)
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Użytkownik jest zablokowany! Skontaktuj się z administratrem"));
@@ -77,6 +72,8 @@ public class AuthController {
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
                 userDetails.getUsername(),
+                user.get().getUserFirstName(),
+                user.get().getUserSecondName(),
                 userDetails.getEmail(),
                 roles));
     }
@@ -99,39 +96,36 @@ public class AuthController {
         // Create new user's account
         User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()));
+                encoder.encode(signUpRequest.getPassword()), signUpRequest.getUserFirstName(), signUpRequest.getUserSecondName());
 
-        Set<String> strRoles = signUpRequest.getRole();
-        Set<Role> roles = new HashSet<>();
+        String strRoles = signUpRequest.getRole();
 
         if (strRoles == null) {
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
+            user.setRole(userRole);
         } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
+            switch (strRoles) {
+                case "admin" -> {
+                    Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    user.setRole(adminRole);
                 }
-            });
+                case "mod" -> {
+                    Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    user.setRole(modRole);
+                }
+                default -> {
+                    Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    user.setRole(userRole);
+                }
+            }
+
         }
 
-        user.setRoles(roles);
+
         userRepository.save(user);
 
         return ResponseEntity

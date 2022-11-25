@@ -12,19 +12,22 @@ public class BorrowBook {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long idBookBorrow;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idUser")
     private User user;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "idBook")
     private Book book;
-
     @NotNull
     private LocalDate dateBorrowBook;
 
     private LocalDate dateReturnBook;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private BStatus status;
 
 
     public BorrowBook(User user, Book book, LocalDate dateBorrowBook, LocalDate dateReturnBook) {
@@ -32,8 +35,17 @@ public class BorrowBook {
         this.book = book;
         this.dateBorrowBook = dateBorrowBook;
         this.dateReturnBook = dateReturnBook;
+        this.status = BStatus.W_OCZEKIWANIU;
     }
 
+
+    public BStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BStatus status) {
+        this.status = status;
+    }
 
     public BorrowBook() {
 

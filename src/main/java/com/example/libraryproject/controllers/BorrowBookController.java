@@ -1,9 +1,12 @@
 package com.example.libraryproject.controllers;
 
+import com.example.libraryproject.Models.BorrowBook;
 import com.example.libraryproject.services.BorrowBookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -21,6 +24,39 @@ public class BorrowBookController {
     public ResponseEntity<?> addBook(@PathVariable String idBook)
     {
         return borrowBookService.addBorrowBook(Long.valueOf(idBook));
+    }
+
+
+    @GetMapping("/book/borrowed/{idUser}")
+    @PreAuthorize("hasRole('USER')")
+    public List<?> getBorrowedBook(@PathVariable Long idUser)
+    {
+        return borrowBookService.getBorrowedBooks(idUser);
+    }
+
+    @GetMapping("/book/return/{idBook}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> returnBook(@PathVariable Long idBook)
+    {
+        return borrowBookService.getReturnBook(idBook);
+    }
+
+    @GetMapping("book/accept/{idBook}")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<?> acceptBorrowBook(@PathVariable Long idBook) {
+        return borrowBookService.getAcceptBorrowBook(idBook);
+    }
+
+    @GetMapping("book/cancel/{idBook}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR')")
+    public ResponseEntity<?> cancelBorrowBook(@PathVariable Long idBook) {
+        return borrowBookService.getCancelBorrowBook(idBook);
+    }
+
+    @GetMapping("/book/waitingbook")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public List<BorrowBook> getWaitingBooks() {
+       return borrowBookService.getWaitingBooks();
     }
 
 }

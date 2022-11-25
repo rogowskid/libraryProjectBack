@@ -1,10 +1,13 @@
 package com.example.libraryproject.controllers;
 
 import com.example.libraryproject.Models.User;
+import com.example.libraryproject.services.BorrowBookService;
 import com.example.libraryproject.services.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -14,8 +17,11 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    private final BorrowBookService borrowBookService;
+
+    public UserController(UserService userService, BorrowBookService borrowBookService) {
         this.userService = userService;
+        this.borrowBookService = borrowBookService;
     }
 
 
@@ -34,4 +40,25 @@ public class UserController {
         userService.changeStatus(idUser);
     }
 
+    @GetMapping("/user/{idUser}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public User getUser(@PathVariable Long idUser)
+    {
+        return userService.getUser(idUser);
+    }
+
+    @GetMapping("/user/borrowcount/{idUser}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public Long getCount(@PathVariable Long idUser)
+    {
+        return borrowBookService.getBorrowsCount(idUser);
+    }
+
+    @PostMapping("/user/update")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> updateUser(@RequestBody User user)
+    {
+       return userService.updateUser(user);
+
+    }
 }

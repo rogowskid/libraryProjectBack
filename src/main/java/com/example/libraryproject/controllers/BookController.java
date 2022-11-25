@@ -51,6 +51,7 @@ public class BookController {
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<?> addBook(@RequestBody Book book)
     {
+
         return bookService.addBook(book);
     }
 
