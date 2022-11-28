@@ -6,6 +6,7 @@ import com.example.libraryproject.services.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -53,6 +54,12 @@ public class BookController {
     {
 
         return bookService.addBook(book);
+    }
+
+    @PostMapping("/uploadimage")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public void addBookImage(@RequestParam("image") MultipartFile image){
+        bookService.addImageBook(image);
     }
 
     @GetMapping("/book/{idbook}")

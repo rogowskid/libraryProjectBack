@@ -8,8 +8,11 @@ import com.example.libraryproject.payload.response.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import java.io.*;
+import java.nio.file.FileSystems;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,6 +94,21 @@ public class BookService {
         }
 
     }
+
+    public void addImageBook(MultipartFile image){
+        File file = new File(FileSystems.getDefault().getPath("src", "main", "resources", "images").toAbsolutePath()
+                + "\\" + image.getOriginalFilename());
+
+
+
+        try (OutputStream os = new FileOutputStream(file)) {
+            os.write(image.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 
     public List<Book> getBooks() {
