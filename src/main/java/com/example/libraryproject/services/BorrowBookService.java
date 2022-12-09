@@ -6,18 +6,26 @@ import com.example.libraryproject.Repository.BorrowBookRepository;
 import com.example.libraryproject.Repository.UserRepository;
 import com.example.libraryproject.config.SessionComponent;
 import com.example.libraryproject.payload.response.MessageResponse;
+import lombok.SneakyThrows;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
+import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-
-import static java.util.stream.Collectors.toList;
 
 
 @Service
@@ -33,6 +41,13 @@ public class BorrowBookService {
     BorrowBookRepository borrowBookRepository;
     @Autowired
     private SessionComponent sessionComponent;
+
+
+    static final Path BLOCKED_PATH = Path.of(FileSystems.getDefault().getPath("src", "main", "resources",
+            "books/blocked").toAbsolutePath().toString());
+
+    static final Path AVAILABLE_PATH = Path.of(FileSystems.getDefault().getPath("src", "main", "resources",
+            "books/available/").toAbsolutePath().toString());
 
     public ResponseEntity<?> addBorrowBook(Long idBook) {
         Book book = bookRepository.findById(idBook).orElseThrow(() -> null);
@@ -104,34 +119,59 @@ public class BorrowBookService {
                     .badRequest()
                     .body(new MessageResponse("Wystąpił błąd"));
 
-        if(byBook.getUser() != null)
+        if (byBook.getUser() != null)
             byBook.setUser((User) Hibernate.unproxy(byBook.getUser()));
-
 
 
         borrowBookRepository.delete(byBook);
         book.setCapacity(book.getCapacity() + 1);
+
+        try {
+            Files.delete(Path.of(AVAILABLE_PATH + "/" + String.valueOf(byBook.getIdBookBorrow()) + ".pdf"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return ResponseEntity
                 .ok()
                 .body(new MessageResponse("Pomyślnie zwrócono książke"));
     }
 
-    public ResponseEntity<?> getAcceptBorrowBook(Long idBook)
-    {
+    @SneakyThrows
+    public ResponseEntity<?> getAcceptBorrowBook(Long idBook) {
         Book book = bookRepository.findById(idBook).orElse(null);
-        if(book == null)
+        if (book == null)
             return ResponseEntity.badRequest().body(new MessageResponse("Coś poszło nie tak."));
 
         BorrowBook byBook = borrowBookRepository.findByBook(book);
         byBook.setStatus(BStatus.ZREALIZOWANE);
 
+
+        try {
+            Files.copy(Path.of(BLOCKED_PATH + "\\" + book.getISBN() + ".pdf"),
+                    Path.of(AVAILABLE_PATH + "\\" + byBook.getIdBookBorrow() + ".pdf"));
+            File file = Path.of(AVAILABLE_PATH + "\\" + byBook.getIdBookBorrow() + ".pdf").toFile();
+            PDDocument pdd = PDDocument.load(file);
+            AccessPermission ap = new AccessPermission();
+
+            StandardProtectionPolicy stpp = new StandardProtectionPolicy("biblioteka_haslo",
+                    byBook.getUser().getUsername(), ap);
+            stpp.setEncryptionKeyLength(128);
+            stpp.setPermissions(ap);
+            pdd.protect(stpp);
+            pdd.save(file);
+            pdd.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
         return ResponseEntity.ok().body(new MessageResponse("Pomyślnie zmieniono status."));
     }
 
-    public ResponseEntity<?> getCancelBorrowBook(Long idBook)
-    {
+    public ResponseEntity<?> getCancelBorrowBook(Long idBook) {
         Book book = bookRepository.findById(idBook).orElse(null);
-        if(book == null)
+        if (book == null)
             return ResponseEntity.badRequest().body(new MessageResponse("Coś poszło nie tak."));
 
         BorrowBook byBook = borrowBookRepository.findByBook(book);
@@ -140,11 +180,26 @@ public class BorrowBookService {
         return ResponseEntity.ok().body(new MessageResponse("Pomyślnie anulowano wypożyczenie."));
 
     }
-    public List<BorrowBook> getWaitingBooks()
-    {
 
-
+    public List<BorrowBook> getWaitingBooks() {
         return borrowBookRepository.findAllByStatus(BStatus.W_OCZEKIWANIU);
+    }
+
+    public ResponseEntity<?> extendReturnBook(Long idBook) {
+        BorrowBook book = borrowBookRepository.findByBook(bookRepository.findById(idBook).get());
+
+        if (ChronoUnit.DAYS.between(book.getDateBorrowBook(), book.getDateReturnBook()) >= 100L)
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Przykro mi. Wypożyczenie nie może trwać dłużej niż 100 dni."));
+
+        book.setDateReturnBook(book.getDateReturnBook().plusWeeks(2));
+
+        borrowBookRepository.save(book);
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse("Pomyślnie przedłużono wypożyczenie o 2 tygodnie."));
     }
 
     @Scheduled(cron = "0 0 * * * *")
@@ -153,10 +208,22 @@ public class BorrowBookService {
                 .stream().filter(book -> book.getDateReturnBook().isBefore(LocalDate.now())).toList();
 
         bookBorrowStream.forEach(bookBorrow ->
-                userRepository.findById(bookBorrow.getUser().getId()).ifPresent(user -> {
-                    user.setStatus(UStatus.STATUS_INACTIVE);
-                    userRepository.save(user);
-                })
+                {
+                    userRepository.findById(bookBorrow.getUser().getId()).ifPresent(user -> {
+                        user.setStatus(UStatus.STATUS_INACTIVE);
+                        userRepository.save(user);
+                        user.getBooksBorrowList().forEach(book -> {
+                            try {
+                                Files.delete(Path.of(AVAILABLE_PATH + "\\" + book.getIdBookBorrow() + ".pdf"));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                    });
+
+
+                }
+
         );
 
     }

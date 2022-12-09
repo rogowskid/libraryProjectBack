@@ -65,6 +65,7 @@ public class SecurityConfig {
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/**").permitAll()
                 .antMatchers("/images/**").permitAll()
+                .antMatchers("/books/available/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .logout()

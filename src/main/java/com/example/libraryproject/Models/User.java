@@ -1,16 +1,14 @@
 package com.example.libraryproject.Models;
 
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import javax.transaction.Transactional;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 @Entity
 @Table(name = "users",
         uniqueConstraints = {
@@ -55,8 +53,10 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private List<BorrowBook> booksBorrowList;
 
-
-
+    @JsonIgnore
+    public List<BorrowBook> getBooksBorrowList() {
+        return booksBorrowList;
+    }
 
     public User() {
     }
@@ -83,6 +83,17 @@ public class User {
         this.userFirstName = userFirstName;
         this.userSecondName = userSecondName;
         this.status = UStatus.STATUS_ACTIVE;
+    }
+
+    public User(String username, String email, String password, String userFirstName, String userSecondName,
+                UStatus status, Role role) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.userFirstName = userFirstName;
+        this.userSecondName = userSecondName;
+        this.status = status;
+        this.role = role;
     }
 
     public User(String username, String email, String password, UStatus status, Role role) {

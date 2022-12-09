@@ -5,16 +5,23 @@ import com.example.libraryproject.Models.CategoryBook;
 import com.example.libraryproject.Repository.BookRepository;
 import com.example.libraryproject.Repository.CategoryBookRepository;
 import com.example.libraryproject.payload.response.MessageResponse;
+import lombok.SneakyThrows;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.List;
-import java.util.Optional;
+
+import static com.example.libraryproject.services.BorrowBookService.AVAILABLE_PATH;
 
 @Service
 public class BookService {
@@ -68,6 +75,14 @@ public class BookService {
                     1943, "1569634489760", categoryBookRepository.findByCategoryName("Akcja")));
             bookRepository.save(new Book("Balladyna", "Juliusz Słowacki", 1839,
                     "4440014035818", categoryBookRepository.findByCategoryName("Dramat")));
+
+            try {
+
+                FileUtils.deleteDirectory(AVAILABLE_PATH.toFile());
+                Files.createDirectory(AVAILABLE_PATH);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -88,6 +103,8 @@ public class BookService {
             }
 
         } else {
+            CategoryBook byCategoryName = categoryBookRepository.findByCategoryName(book.getCategoryBook().getCategoryName());
+            book.setCategoryBook(byCategoryName);
             bookRepository.save(book);
             return ResponseEntity
                     .ok(new MessageResponse("Book added successfully!"));
@@ -100,7 +117,6 @@ public class BookService {
                 + "\\" + image.getOriginalFilename());
 
 
-
         try (OutputStream os = new FileOutputStream(file)) {
             os.write(image.getBytes());
         } catch (IOException e) {
@@ -108,7 +124,19 @@ public class BookService {
         }
     }
 
+    @SneakyThrows
+    public void addEBook(MultipartFile book) {
+        File file = new File(FileSystems.getDefault().getPath("src", "main", "resources", "books", "blocked").toAbsolutePath()
+                + "\\" + book.getOriginalFilename());
 
+        try (OutputStream os = new FileOutputStream(file)) {
+            os.write(book.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
 
     public List<Book> getBooks() {

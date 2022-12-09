@@ -56,7 +56,13 @@ public class BorrowBookController {
     @GetMapping("/book/waitingbook")
     @PreAuthorize("hasRole('MODERATOR')")
     public List<BorrowBook> getWaitingBooks() {
-       return borrowBookService.getWaitingBooks();
+        return borrowBookService.getWaitingBooks();
+    }
+
+    @GetMapping("/book/return/extend/{idBook}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> extendReturnBook(@PathVariable Long idBook) {
+        return borrowBookService.extendReturnBook(idBook);
     }
 
 }

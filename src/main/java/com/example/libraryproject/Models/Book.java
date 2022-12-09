@@ -1,15 +1,14 @@
 package com.example.libraryproject.Models;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.Range;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 import java.util.List;
 
 @Entity
@@ -17,7 +16,7 @@ import java.util.List;
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "ISBN")
         })
-public class Book implements Serializable {
+public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idBook;
@@ -47,12 +46,9 @@ public class Book implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "book")
     private List<BorrowBook> booksBorrowList;
 
-
-
-
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idCategoryBook")
+    @JoinColumn(name = "categoryBook")
+    @JsonBackReference
     private CategoryBook categoryBook;
 
 
@@ -141,6 +137,7 @@ public class Book implements Serializable {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
+
     public CategoryBook getCategoryBook() {
         return categoryBook;
     }

@@ -8,7 +8,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -58,19 +57,23 @@ public class BookController {
 
     @PostMapping("/uploadimage")
     @PreAuthorize("hasRole('MODERATOR')")
-    public void addBookImage(@RequestParam("image") MultipartFile image){
+    public void addBookImage(@RequestParam("image") MultipartFile image) {
         bookService.addImageBook(image);
     }
 
+    @PostMapping("/uploadbook")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public void addEBook(@RequestParam("book") MultipartFile book) {
+        bookService.addEBook(book);
+    }
+
     @GetMapping("/book/{idbook}")
-    public Book getBook(@PathVariable Long idbook)
-    {
+    public Book getBook(@PathVariable Long idbook) {
         return bookService.getBook(idbook);
     }
 
     @GetMapping("/getallcategories")
-    public List<CategoryBook> getCategoriesBook()
-    {
+    public List<CategoryBook> getCategoriesBook() {
         return bookService.getCategoriesBookName();
     }
 

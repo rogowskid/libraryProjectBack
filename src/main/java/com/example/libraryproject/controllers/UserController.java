@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -25,18 +24,21 @@ public class UserController {
     }
 
 
-
     @GetMapping("/allusers/{role}")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-    public List<User> getUsers(@PathVariable String role)
-    {
+    public List<User> getUsers(@PathVariable String[] role) {
         return userService.getUsersByRole(role);
+    }
+
+    @GetMapping("/updaterole/{idUser}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> setModeratorRole(@PathVariable Long idUser) {
+        return userService.setModeratorMode(idUser);
     }
 
     @GetMapping("/changestatus/{idUser}")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-    public void changeStatusUser(@PathVariable Long idUser)
-    {
+    public void changeStatusUser(@PathVariable Long idUser) {
         userService.changeStatus(idUser);
     }
 
@@ -56,9 +58,15 @@ public class UserController {
 
     @PostMapping("/user/update")
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> updateUser(@RequestBody User user)
-    {
-       return userService.updateUser(user);
+    public ResponseEntity<?> updateUser(@RequestBody User user) {
+        return userService.updateUser(user);
 
     }
+
+    @GetMapping("/user/delete/{idUser}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> deleteUser(@PathVariable Long idUser) {
+        return userService.deleteUser(idUser);
+    }
+
 }
