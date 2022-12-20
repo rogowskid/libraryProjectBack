@@ -138,6 +138,14 @@ public class BookService {
 
     }
 
+    public ResponseEntity<MessageResponse> deleteBook(Book book) {
+        bookRepository.delete(book);
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse("Poprawnie usunięto książke"));
+    }
+
 
     public List<Book> getBooks() {
         return bookRepository.findAll();

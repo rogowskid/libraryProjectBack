@@ -58,6 +58,11 @@ public class User {
         return booksBorrowList;
     }
 
+    @JsonIgnore
+    public void setBooksBorrowList(List<BorrowBook> booksBorrowList) {
+        this.booksBorrowList = booksBorrowList;
+    }
+
     public User() {
     }
 
