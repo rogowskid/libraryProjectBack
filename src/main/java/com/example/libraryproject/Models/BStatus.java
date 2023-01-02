@@ -5,5 +5,5 @@ public enum BStatus {
     ZREALIZOWANE,
     W_OCZEKIWANIU,
     ANULOWANE,
-
+    REZERWACJA,
 }

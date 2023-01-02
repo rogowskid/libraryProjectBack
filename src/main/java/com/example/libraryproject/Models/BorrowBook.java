@@ -38,6 +38,13 @@ public class BorrowBook {
         this.status = BStatus.W_OCZEKIWANIU;
     }
 
+    public BorrowBook(User user, Book book, LocalDate dateBorrowBook, LocalDate dateReturnBook, BStatus bStatus) {
+        this.user = user;
+        this.book = book;
+        this.dateBorrowBook = dateBorrowBook;
+        this.dateReturnBook = dateReturnBook;
+        this.status = bStatus;
+    }
 
     public BStatus getStatus() {
         return status;

@@ -26,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -72,6 +73,31 @@ public class BorrowBookService {
                 .ok()
                 .body(new MessageResponse("Brawo! Udało Ci się wypożyczyć książke."));
 
+    }
+
+    public ResponseEntity<?> getReservationBook(Long idBook) {
+        Book book = bookRepository.findById(idBook).orElseThrow(() -> null);
+
+        if (book == null)
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Taka książka nie istnieje!"));
+
+        if (book.getCapacity() < 1)
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Brak dostępnych egzemplarzy"));
+
+        User user = userRepository.findByUsername(sessionComponent.getSessionUserLogin()).orElseThrow(() -> null);
+        if (user != null) {
+            borrowBookRepository.save(new BorrowBook(user, book, LocalDate.now(), LocalDate.now().plusWeeks(2),
+                    BStatus.REZERWACJA));
+            bookRepository.setBorrowBook(1, book.getIdBook());
+        }
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse("Brawo! Udało Ci się zarezerwować książke."));
     }
 
     public Long getBorrowsCount(Long idUser) {
@@ -166,7 +192,22 @@ public class BorrowBookService {
         }
 
 
-        return ResponseEntity.ok().body(new MessageResponse("Pomyślnie zmieniono status."));
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse("Pomyślnie zmieniono status."));
+    }
+
+    public ResponseEntity<?> getAcceptReservationBook(Long idBook) {
+        Book book = bookRepository.findById(idBook).orElse(null);
+        if (book == null)
+            return ResponseEntity.badRequest().body(new MessageResponse("Coś poszło nie tak."));
+
+        BorrowBook byBook = borrowBookRepository.findByBook(book);
+        byBook.setStatus(BStatus.ZREALIZOWANE);
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse("Pomyślnie zmieniono status."));
     }
 
     public ResponseEntity<?> getCancelBorrowBook(Long idBook) {
@@ -176,13 +217,17 @@ public class BorrowBookService {
 
         BorrowBook byBook = borrowBookRepository.findByBook(book);
         borrowBookRepository.delete(byBook);
+        book.setCapacity(book.getCapacity() + 1);
 
+        bookRepository.save(book);
         return ResponseEntity.ok().body(new MessageResponse("Pomyślnie anulowano wypożyczenie."));
 
     }
 
     public List<BorrowBook> getWaitingBooks() {
-        return borrowBookRepository.findAllByStatus(BStatus.W_OCZEKIWANIU);
+        return borrowBookRepository.findAll().stream()
+                .filter(borrowBook -> borrowBook.getStatus().equals(BStatus.W_OCZEKIWANIU) || borrowBook.getStatus().equals(BStatus.REZERWACJA))
+                .collect(Collectors.toList());
     }
 
     public ResponseEntity<?> extendReturnBook(Long idBook) {

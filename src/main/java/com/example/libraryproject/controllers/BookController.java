@@ -43,15 +43,13 @@ public class BookController {
 
     @GetMapping("/books")
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public List<Book> getAccessBooks()
-    {
+    public List<Book> getAccessBooks() {
         return bookService.getBooks(0);
     }
+
     @PostMapping("/addbook")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> addBook(@RequestBody Book book)
-    {
-
+    public ResponseEntity<?> addBook(@RequestBody Book book) {
         return bookService.addBook(book);
     }
 
