@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -51,8 +52,7 @@ public class UserController {
 
     @GetMapping("/user/borrowcount/{idUser}")
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public Long getCount(@PathVariable Long idUser)
-    {
+    public Long getCount(@PathVariable Long idUser) {
         return borrowBookService.getBorrowsCount(idUser);
     }
 
@@ -60,6 +60,13 @@ public class UserController {
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<?> updateUser(@RequestBody User user) {
         return userService.updateUser(user);
+
+    }
+
+    @PostMapping("/user/update/password")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> updatePassword(@RequestBody Map<String, String> json) {
+        return userService.updateUserPassword(json);
 
     }
 

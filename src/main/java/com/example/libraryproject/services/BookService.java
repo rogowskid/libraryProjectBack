@@ -94,12 +94,12 @@ public class BookService {
                 bookRepository.addBookCapacity(book.getCapacity(), id.getIdBook());
                 return ResponseEntity
                         .ok()
-                        .body(new MessageResponse("Copy of book added successfully!"));
+                        .body(new MessageResponse("Kopia książki została dodana!"));
 
             } else {
                 return ResponseEntity
                         .badRequest()
-                        .body(new MessageResponse("Error: ISBN is already taken!"));
+                        .body(new MessageResponse("Błąd! Ten numer ISBN jest już wykorzystany"));
             }
 
         } else {
@@ -107,7 +107,7 @@ public class BookService {
             book.setCategoryBook(byCategoryName);
             bookRepository.save(book);
             return ResponseEntity
-                    .ok(new MessageResponse("Book added successfully!"));
+                    .ok(new MessageResponse("Poprawnie udało się dodać nową książkę!"));
         }
 
     }

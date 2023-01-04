@@ -97,7 +97,7 @@ public class BorrowBookService {
 
         return ResponseEntity
                 .ok()
-                .body(new MessageResponse("Brawo! Udało Ci się zarezerwować książke."));
+                .body(new MessageResponse("Brawo! Udało Ci się wypożyczyć książke."));
     }
 
     public Long getBorrowsCount(Long idUser) {

@@ -9,12 +9,16 @@ import com.example.libraryproject.Repository.UserRepository;
 import com.example.libraryproject.payload.response.MessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -27,6 +31,8 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    AuthenticationManager authenticationManager;
 
     @PostConstruct
     private void getAdminAndModerator() {
@@ -126,4 +132,27 @@ public class UserService {
     }
 
 
+    public ResponseEntity<?> updateUserPassword(Map<String, String> json) {
+
+        User user = userRepository.findByUsername((json.get("login"))).get();
+
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(json.get("login"), json.get("nowPassword"))).isAuthenticated();
+        } catch (AuthenticationException e) {
+            ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Aktualne hasło zostało podane błędne. Spróbuj ponownie."));
+        }
+
+
+        user.setPassword(passwordEncoder.encode(json.get("password")));
+
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse("Pomyślnie udało ci się zmienić hasło"));
+
+    }
 }
