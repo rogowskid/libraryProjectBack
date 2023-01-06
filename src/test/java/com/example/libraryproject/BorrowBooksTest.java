@@ -34,7 +34,7 @@ public class BorrowBooksTest {
         createUser("user");
         borrowBookService.addBorrowBook(1L);
         createUser("moderator");
-        ResponseEntity<?> acceptBorrowBook = borrowBookService.getAcceptBorrowBook(1L);
+        ResponseEntity<?> acceptBorrowBook = borrowBookService.getAcceptBorrowBookOnline(1L);
         assertTrue(acceptBorrowBook.getStatusCode().is2xxSuccessful());
         ResponseEntity<?> returnBook = borrowBookService.getReturnBook(1L);
         assertTrue(returnBook.getStatusCode().is2xxSuccessful());

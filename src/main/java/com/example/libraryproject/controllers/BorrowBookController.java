@@ -32,7 +32,7 @@ public class BorrowBookController {
     }
 
     @GetMapping("/book/borrowed/{idUser}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR')")
     public List<?> getBorrowedBook(@PathVariable Long idUser) {
         return borrowBookService.getBorrowedBooks(idUser);
     }
@@ -46,13 +46,13 @@ public class BorrowBookController {
     @GetMapping("book/accept/{idBook}")
     @PreAuthorize("hasRole('MODERATOR')")
     public ResponseEntity<?> acceptBorrowBook(@PathVariable Long idBook) {
-        return borrowBookService.getAcceptBorrowBook(idBook);
+        return borrowBookService.getAcceptBorrowBookOnline(idBook);
     }
 
     @GetMapping("book/accept/reservation/{idBook}")
     @PreAuthorize("hasRole('MODERATOR')")
     public ResponseEntity<?> acceptReservationBook(@PathVariable Long idBook) {
-        return borrowBookService.getAcceptReservationBook(idBook);
+        return borrowBookService.getAcceptBookTradicional(idBook);
     }
 
     @GetMapping("book/cancel/{idBook}")
@@ -71,6 +71,12 @@ public class BorrowBookController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> extendReturnBook(@PathVariable Long idBook) {
         return borrowBookService.extendReturnBook(idBook);
+    }
+
+    @GetMapping("/book/allborrowedbook")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public List<BorrowBook> allBorrowedBook() {
+        return borrowBookService.getBorrowedBooks();
     }
 
 }

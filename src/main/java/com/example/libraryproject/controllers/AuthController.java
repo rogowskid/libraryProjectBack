@@ -63,7 +63,7 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         Optional<User> user = userRepository.findByUsername(loginRequest.getUsername());
-        if (user.get().getStatus() == UStatus.STATUS_INACTIVE)
+        if (user.get().getStatus() == UStatus.STATUS_NIEAKTYWNY)
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Użytkownik jest zablokowany! Skontaktuj się z administratrem"));

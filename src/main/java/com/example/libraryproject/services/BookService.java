@@ -112,7 +112,7 @@ public class BookService {
 
     }
 
-    public void addImageBook(MultipartFile image){
+    public void addImageBook(MultipartFile image) {
         File file = new File(FileSystems.getDefault().getPath("src", "main", "resources", "images").toAbsolutePath()
                 + "\\" + image.getOriginalFilename());
 
@@ -146,6 +146,27 @@ public class BookService {
                 .body(new MessageResponse("Poprawnie usunięto książke"));
     }
 
+    public ResponseEntity<MessageResponse> deleteBook(Long idBook) {
+        Book book = bookRepository.findById(idBook).orElse(null);
+
+        if (book == null)
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Wystąpił błąd."));
+
+
+        if (book.getCapacity() == 1)
+            bookRepository.delete(book);
+        else {
+            book.setCapacity(book.getCapacity() - 1);
+            bookRepository.save(book);
+        }
+
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse("Poprawnie usunięto książke"));
+    }
 
     public List<Book> getBooks() {
         return bookRepository.findAll();

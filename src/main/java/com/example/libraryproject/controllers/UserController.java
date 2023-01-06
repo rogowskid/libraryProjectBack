@@ -76,4 +76,16 @@ public class UserController {
         return userService.deleteUser(idUser);
     }
 
+
+    @GetMapping("/user/getrole/{idUser}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public String checkRole(@PathVariable String idUser) {
+        return userService.getRole(Long.valueOf(idUser));
+    }
+
+    @GetMapping("/user/finduser/{idUser}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    public User findUser(@PathVariable String idUser) {
+        return userService.findUser(Long.valueOf(idUser));
+    }
 }

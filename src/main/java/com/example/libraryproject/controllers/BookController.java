@@ -53,6 +53,12 @@ public class BookController {
         return bookService.addBook(book);
     }
 
+    @GetMapping("/deletebook/{idbook}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> deleteBook(@PathVariable String idbook) {
+        return bookService.deleteBook(Long.valueOf(idbook));
+    }
+
     @PostMapping("/uploadimage")
     @PreAuthorize("hasRole('MODERATOR')")
     public void addBookImage(@RequestParam("image") MultipartFile image) {

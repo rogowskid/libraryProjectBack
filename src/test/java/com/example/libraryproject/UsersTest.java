@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -53,7 +52,7 @@ public class UsersTest {
     public void addModeratorRole() {
 
         User user = new User("test", "test@wp.pl", passwordEncoder.encode("123456"), "Test", "Testo1",
-                UStatus.STATUS_ACTIVE, roleRepository.findByName(ERole.ROLE_USER).orElseThrow());
+                UStatus.STATUS_AKTYWNY, roleRepository.findByName(ERole.ROLE_USER).orElseThrow());
 
         userRepository.save(user);
         ResponseEntity<?> responseEntity = userService.setModeratorMode(user.getId());
@@ -66,7 +65,7 @@ public class UsersTest {
     @WithMockUser(username = "moderator", roles = {"MODERATOR"})
     public void deleteUser() {
         User user = new User("test", "test@wp.pl", passwordEncoder.encode("123456"), "Test", "Testo1",
-                UStatus.STATUS_ACTIVE, roleRepository.findByName(ERole.ROLE_USER).orElseThrow());
+                UStatus.STATUS_AKTYWNY, roleRepository.findByName(ERole.ROLE_USER).orElseThrow());
 
         userRepository.save(user);
         ResponseEntity<?> responseEntity = userService.deleteUser(user.getId());
@@ -77,10 +76,10 @@ public class UsersTest {
     @WithAnonymousUser
     public void changeStatus() {
         User user = new User("test", "test@wp.pl", passwordEncoder.encode("123456"), "Test", "Testo1",
-                UStatus.STATUS_ACTIVE, roleRepository.findByName(ERole.ROLE_USER).orElseThrow());
+                UStatus.STATUS_AKTYWNY, roleRepository.findByName(ERole.ROLE_USER).orElseThrow());
         userRepository.save(user);
         userService.changeStatus(user.getId());
-        assertEquals(userRepository.findById(user.getId()).get().getStatus(), UStatus.STATUS_INACTIVE);
+        assertEquals(userRepository.findById(user.getId()).get().getStatus(), UStatus.STATUS_NIEAKTYWNY);
         userRepository.delete(user);
     }
 
@@ -91,7 +90,11 @@ public class UsersTest {
         loginRequest.setPassword("123");
         loginRequest.setUsername("test");
 
-        assertThrowsExactly(BadCredentialsException.class, () -> authController.authenticateUser(loginRequest));
+
+        ResponseEntity<?> responseEntity = authController.authenticateUser(loginRequest);
+
+        assertTrue(responseEntity.getStatusCode().is4xxClientError());
+
     }
 
     @Test

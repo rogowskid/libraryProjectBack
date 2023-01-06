@@ -35,7 +35,7 @@ public class BorrowBook {
         this.book = book;
         this.dateBorrowBook = dateBorrowBook;
         this.dateReturnBook = dateReturnBook;
-        this.status = BStatus.W_OCZEKIWANIU;
+        this.status = BStatus.WYPOZYCZENIE_ELEKTRONICZNE;
     }
 
     public BorrowBook(User user, Book book, LocalDate dateBorrowBook, LocalDate dateReturnBook, BStatus bStatus) {

@@ -78,7 +78,7 @@ public class User {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.status = UStatus.STATUS_ACTIVE;
+        this.status = UStatus.STATUS_AKTYWNY;
     }
 
     public User(String username, String email, String password, String userFirstName, String userSecondName) {
@@ -87,7 +87,7 @@ public class User {
         this.password = password;
         this.userFirstName = userFirstName;
         this.userSecondName = userSecondName;
-        this.status = UStatus.STATUS_ACTIVE;
+        this.status = UStatus.STATUS_AKTYWNY;
     }
 
     public User(String username, String email, String password, String userFirstName, String userSecondName,

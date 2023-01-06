@@ -91,7 +91,7 @@ public class BorrowBookService {
         User user = userRepository.findByUsername(sessionComponent.getSessionUserLogin()).orElseThrow(() -> null);
         if (user != null) {
             borrowBookRepository.save(new BorrowBook(user, book, LocalDate.now(), LocalDate.now().plusWeeks(2),
-                    BStatus.REZERWACJA));
+                    BStatus.WYPOZYCZENIE_FIZYCZNE));
             bookRepository.setBorrowBook(1, book.getIdBook());
         }
 
@@ -164,13 +164,13 @@ public class BorrowBookService {
     }
 
     @SneakyThrows
-    public ResponseEntity<?> getAcceptBorrowBook(Long idBook) {
+    public ResponseEntity<?> getAcceptBorrowBookOnline(Long idBook) {
         Book book = bookRepository.findById(idBook).orElse(null);
         if (book == null)
             return ResponseEntity.badRequest().body(new MessageResponse("Coś poszło nie tak."));
 
         BorrowBook byBook = borrowBookRepository.findByBook(book);
-        byBook.setStatus(BStatus.ZREALIZOWANE);
+        byBook.setStatus(BStatus.ZREALIZOWANE_ELEKTRONICZNIE);
 
 
         try {
@@ -197,13 +197,13 @@ public class BorrowBookService {
                 .body(new MessageResponse("Pomyślnie zmieniono status."));
     }
 
-    public ResponseEntity<?> getAcceptReservationBook(Long idBook) {
+    public ResponseEntity<?> getAcceptBookTradicional(Long idBook) {
         Book book = bookRepository.findById(idBook).orElse(null);
         if (book == null)
             return ResponseEntity.badRequest().body(new MessageResponse("Coś poszło nie tak."));
 
         BorrowBook byBook = borrowBookRepository.findByBook(book);
-        byBook.setStatus(BStatus.ZREALIZOWANE);
+        byBook.setStatus(BStatus.ZREALIZOWANE_FIZYCZNE);
 
         return ResponseEntity
                 .ok()
@@ -226,7 +226,13 @@ public class BorrowBookService {
 
     public List<BorrowBook> getWaitingBooks() {
         return borrowBookRepository.findAll().stream()
-                .filter(borrowBook -> borrowBook.getStatus().equals(BStatus.W_OCZEKIWANIU) || borrowBook.getStatus().equals(BStatus.REZERWACJA))
+                .filter(borrowBook -> borrowBook.getStatus().equals(BStatus.WYPOZYCZENIE_ELEKTRONICZNE) || borrowBook.getStatus().equals(BStatus.WYPOZYCZENIE_FIZYCZNE))
+                .collect(Collectors.toList());
+    }
+
+    public List<BorrowBook> getBorrowedBooks() {
+        return borrowBookRepository.findAll().stream()
+                .filter(borrowBook -> borrowBook.getStatus().equals(BStatus.ZREALIZOWANE_ELEKTRONICZNIE) || borrowBook.getStatus().equals(BStatus.ZREALIZOWANE_FIZYCZNE))
                 .collect(Collectors.toList());
     }
 
@@ -255,7 +261,7 @@ public class BorrowBookService {
         bookBorrowStream.forEach(bookBorrow ->
                 {
                     userRepository.findById(bookBorrow.getUser().getId()).ifPresent(user -> {
-                        user.setStatus(UStatus.STATUS_INACTIVE);
+                        user.setStatus(UStatus.STATUS_NIEAKTYWNY);
                         userRepository.save(user);
                         user.getBooksBorrowList().forEach(book -> {
                             try {

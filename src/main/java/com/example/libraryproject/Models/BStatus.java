@@ -2,8 +2,10 @@ package com.example.libraryproject.Models;
 
 public enum BStatus {
 
-    ZREALIZOWANE,
-    W_OCZEKIWANIU,
+    ZREALIZOWANE_ELEKTRONICZNIE,
+    ZREALIZOWANE_FIZYCZNE,
+
+    WYPOZYCZENIE_ELEKTRONICZNE,
     ANULOWANE,
-    REZERWACJA,
+    WYPOZYCZENIE_FIZYCZNE,
 }

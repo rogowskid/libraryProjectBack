@@ -48,15 +48,15 @@ public class UserService {
 
         if (userRepository.count() == 0) {
             userRepository.save(new User("moderator", "mod@support.com", passwordEncoder.encode("123456"),
-                    "Daniel", "Moderatorek", UStatus.STATUS_ACTIVE,
+                    "Daniel", "Moderatorek", UStatus.STATUS_AKTYWNY,
                     roleRepository.findByName(ERole.ROLE_MODERATOR).orElseThrow()));
 
             userRepository.save(new User("admin", "admin@support.com", passwordEncoder.encode("123456"),
-                    "Daniel", "Adminek", UStatus.STATUS_ACTIVE,
+                    "Daniel", "Adminek", UStatus.STATUS_AKTYWNY,
                     roleRepository.findByName(ERole.ROLE_ADMIN).orElseThrow()));
 
             userRepository.save(new User("user", "user@wp.pl", passwordEncoder.encode("123456"),
-                    "Daniel", "Userek", UStatus.STATUS_ACTIVE, roleRepository.findByName(ERole.ROLE_USER).orElseThrow()));
+                    "Daniel", "Userek", UStatus.STATUS_AKTYWNY, roleRepository.findByName(ERole.ROLE_USER).orElseThrow()));
         }
     }
 
@@ -89,11 +89,11 @@ public class UserService {
 
     public void changeStatus(Long idUser) {
         Optional<User> user = userRepository.findById(idUser);
-        if (user.get().getStatus().equals(UStatus.STATUS_ACTIVE)) {
-            user.get().setStatus(UStatus.STATUS_INACTIVE);
+        if (user.get().getStatus().equals(UStatus.STATUS_AKTYWNY)) {
+            user.get().setStatus(UStatus.STATUS_NIEAKTYWNY);
 
         } else {
-            user.get().setStatus(UStatus.STATUS_ACTIVE);
+            user.get().setStatus(UStatus.STATUS_AKTYWNY);
 
         }
         userRepository.save(user.get());
@@ -104,16 +104,29 @@ public class UserService {
     }
 
     public ResponseEntity updateUser(User user) {
-        userRepository.findById(user.getId()).ifPresent(userInRepository ->
-                {
-                    userInRepository.setEmail(user.getEmail());
-                    userInRepository.setUserFirstName(user.getUserFirstName());
-                    userInRepository.setUserSecondName(user.getUserSecondName());
 
-                    userRepository.save(userInRepository);
-                }
+        User userInRepository = userRepository.findById(user.getId()).orElse(null);
 
-        );
+        if (userInRepository == null)
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Wystąpił błąd"));
+
+
+        if (!user.getEmail().equals(userInRepository.getEmail())) {
+            if (userRepository.existsByEmail(user.getEmail()))
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Adres mailowy jest już zajęty."));
+        }
+
+
+        userInRepository.setEmail(user.getEmail());
+        userInRepository.setUserFirstName(user.getUserFirstName());
+        userInRepository.setUserSecondName(user.getUserSecondName());
+        userRepository.save(userInRepository);
+
+
         return ResponseEntity.ok(new MessageResponse("Poprawnie zaaktualizowałeś użytkownika"));
     }
 
@@ -141,7 +154,7 @@ public class UserService {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(json.get("login"), json.get("nowPassword"))).isAuthenticated();
         } catch (AuthenticationException e) {
-            ResponseEntity
+            return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Aktualne hasło zostało podane błędne. Spróbuj ponownie."));
         }
@@ -154,5 +167,17 @@ public class UserService {
                 .ok()
                 .body(new MessageResponse("Pomyślnie udało ci się zmienić hasło"));
 
+    }
+
+
+    public String getRole(Long idUser) {
+        User user = userRepository.findById(idUser).orElse(null);
+
+        return user.getRole().getName().toString();
+
+    }
+
+    public User findUser(Long idUser) {
+        return userRepository.findById(idUser).get();
     }
 }
