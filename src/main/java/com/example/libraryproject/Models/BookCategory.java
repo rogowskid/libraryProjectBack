@@ -7,34 +7,34 @@ import java.util.List;
 
 
 @Entity
-@Table(name = "category_book")
-public class CategoryBook {
+@Table(name = "book_category")
+public class BookCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long idCategoryBook;
+    private long idBookCategory;
 
     @NotBlank
     @Size(max = 40)
     private String categoryName;
 
-    @OneToMany(mappedBy = "categoryBook")
+    @OneToMany(mappedBy = "bookCategory")
     private List<Book> book;
 
-    public CategoryBook(String categoryName) {
+    public BookCategory(String categoryName) {
         this.categoryName = categoryName;
     }
 
-    public CategoryBook() {
+    public BookCategory() {
 
     }
 
-    public long getIdCategoryBook() {
-        return idCategoryBook;
+    public long getIdBookCategory() {
+        return idBookCategory;
     }
 
-    public void setIdCategoryBook(long idCategoryBook) {
-        this.idCategoryBook = idCategoryBook;
+    public void setIdBookCategory(long idBookCategory) {
+        this.idBookCategory = idBookCategory;
     }
 
     public String getCategoryName() {

@@ -131,15 +131,9 @@ public class BorrowBookService {
         return __borrow;
     }
 
-    public ResponseEntity<?> getReturnBook(Long idBook) {
-        Book book = bookRepository.findById(idBook).orElse(null);
-        if (book == null)
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Wystąpił błąd"));
-
-
-        BorrowBook byBook = borrowBookRepository.findByBook(book);
+    public ResponseEntity<?> getReturnBook(Long idBorrowBook) {
+        BorrowBook byBook = borrowBookRepository.findById(idBorrowBook).get();
+        Book book = byBook.getBook();
         if (byBook == null)
             return ResponseEntity
                     .badRequest()
@@ -152,11 +146,14 @@ public class BorrowBookService {
         borrowBookRepository.delete(byBook);
         book.setCapacity(book.getCapacity() + 1);
 
-        try {
-            Files.delete(Path.of(AVAILABLE_PATH + "/" + String.valueOf(byBook.getIdBookBorrow()) + ".pdf"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (byBook.getStatus().toString().equals(BStatus.ZREALIZOWANE_ELEKTRONICZNIE.name())) {
+            try {
+                Files.delete(Path.of(AVAILABLE_PATH + "/" + String.valueOf(byBook.getIdBookBorrow()) + ".pdf"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
+
 
         return ResponseEntity
                 .ok()
@@ -169,7 +166,8 @@ public class BorrowBookService {
         if (book == null)
             return ResponseEntity.badRequest().body(new MessageResponse("Coś poszło nie tak."));
 
-        BorrowBook byBook = borrowBookRepository.findByBook(book);
+        BorrowBook byBook = borrowBookRepository.findAllByBook(book).stream().filter(el -> el.getStatus().toString()
+                .equals(BStatus.WYPOZYCZENIE_ELEKTRONICZNE.name())).findFirst().get();
         byBook.setStatus(BStatus.ZREALIZOWANE_ELEKTRONICZNIE);
 
 
@@ -202,7 +200,8 @@ public class BorrowBookService {
         if (book == null)
             return ResponseEntity.badRequest().body(new MessageResponse("Coś poszło nie tak."));
 
-        BorrowBook byBook = borrowBookRepository.findByBook(book);
+        BorrowBook byBook = borrowBookRepository.findAllByBook(book).stream().filter(el -> el.getStatus().toString()
+                .equals(BStatus.WYPOZYCZENIE_FIZYCZNE.name())).findFirst().get();
         byBook.setStatus(BStatus.ZREALIZOWANE_FIZYCZNE);
 
         return ResponseEntity
@@ -232,7 +231,8 @@ public class BorrowBookService {
 
     public List<BorrowBook> getBorrowedBooks() {
         return borrowBookRepository.findAll().stream()
-                .filter(borrowBook -> borrowBook.getStatus().equals(BStatus.ZREALIZOWANE_ELEKTRONICZNIE) || borrowBook.getStatus().equals(BStatus.ZREALIZOWANE_FIZYCZNE))
+                .filter(borrowBook -> borrowBook.getStatus().equals(BStatus.ZREALIZOWANE_ELEKTRONICZNIE) || borrowBook.getStatus().equals(BStatus.ZREALIZOWANE_FIZYCZNE)
+                        || borrowBook.getStatus().equals(BStatus.OCZEKIWANIE_ZWROTU))
                 .collect(Collectors.toList());
     }
 
@@ -279,4 +279,28 @@ public class BorrowBookService {
 
     }
 
+    public ResponseEntity<?> canReturnBook(Long idBorrowBook) {
+
+        BorrowBook byBook = borrowBookRepository.findById(idBorrowBook).get();
+        if (byBook == null)
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Wystąpił błąd"));
+
+        Book book = bookRepository.findById(byBook.getBook().getIdBook()).orElse(null);
+        if (book == null)
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Wystąpił błąd"));
+
+        if (byBook.getUser() != null)
+            byBook.setUser((User) Hibernate.unproxy(byBook.getUser()));
+
+        byBook.setStatus(BStatus.OCZEKIWANIE_ZWROTU);
+        borrowBookRepository.save(byBook);
+
+        return ResponseEntity
+                .ok()
+                .body(new MessageResponse("Pomyślnie wysłano żądanie o zwrot."));
+    }
 }

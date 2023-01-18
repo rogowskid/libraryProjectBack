@@ -90,7 +90,6 @@ public class UsersTest {
         loginRequest.setPassword("123");
         loginRequest.setUsername("test");
 
-
         ResponseEntity<?> responseEntity = authController.authenticateUser(loginRequest);
 
         assertTrue(responseEntity.getStatusCode().is4xxClientError());

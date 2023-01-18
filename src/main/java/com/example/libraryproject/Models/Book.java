@@ -47,9 +47,9 @@ public class Book {
     private List<BorrowBook> booksBorrowList;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoryBook")
+    @JoinColumn(name = "bookCategory")
     @JsonBackReference
-    private CategoryBook categoryBook;
+    private BookCategory bookCategory;
 
 
     public Book(String bookName, String author, int yearOfPublication, String ISBN) {
@@ -68,26 +68,34 @@ public class Book {
         this.capacity = capacity;
     }
 
-    public Book(String bookName, String author, int yearOfPublication, String ISBN, CategoryBook categoryBook) {
+    public Book(String bookName, String author, int yearOfPublication, String ISBN, BookCategory bookCategory) {
         this.bookName = bookName;
         this.author = author;
         this.yearOfPublication = yearOfPublication;
         this.ISBN = ISBN;
         this.capacity = 1;
-        this.categoryBook = categoryBook;
+        this.bookCategory = bookCategory;
     }
 
-    public Book(String bookName, String author, int yearOfPublication, String ISBN, int capacity, CategoryBook categoryBook) {
+    public Book(String bookName, String author, int yearOfPublication, String ISBN, int capacity, BookCategory bookCategory) {
         this.bookName = bookName;
         this.author = author;
         this.yearOfPublication = yearOfPublication;
         this.ISBN = ISBN;
         this.capacity = capacity;
-        this.categoryBook = categoryBook;
+        this.bookCategory = bookCategory;
     }
 
     public Book() {
 
+    }
+
+    public BookCategory getBookCategory() {
+        return bookCategory;
+    }
+
+    public void setBookCategory(BookCategory bookCategory) {
+        this.bookCategory = bookCategory;
     }
 
     public long getIdBook() {
@@ -138,11 +146,5 @@ public class Book {
         this.capacity = capacity;
     }
 
-    public CategoryBook getCategoryBook() {
-        return categoryBook;
-    }
 
-    public void setCategoryBook(CategoryBook categoryBook) {
-        this.categoryBook = categoryBook;
-    }
 }

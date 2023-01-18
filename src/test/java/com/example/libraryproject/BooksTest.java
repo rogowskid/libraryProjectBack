@@ -1,9 +1,9 @@
 package com.example.libraryproject;
 
 import com.example.libraryproject.Models.Book;
-import com.example.libraryproject.Models.CategoryBook;
+import com.example.libraryproject.Models.BookCategory;
+import com.example.libraryproject.Repository.BookCategoryRepository;
 import com.example.libraryproject.Repository.BookRepository;
-import com.example.libraryproject.Repository.CategoryBookRepository;
 import com.example.libraryproject.services.BookService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +23,16 @@ public class BooksTest {
     @Autowired
     private BookService bookService;
     @Autowired
-    private CategoryBookRepository categoryBookRepository;
+    private BookCategoryRepository bookCategoryRepository;
 
     @Test
     @WithMockUser(username = "moderator", roles = {"MODERATOR"})
     void addBook() {
-        if (categoryBookRepository.findByCategoryName("Powieść") == null)
-            categoryBookRepository.save(new CategoryBook("Akcja"));
+        if (bookCategoryRepository.findByCategoryName("Powieść") == null)
+            bookCategoryRepository.save(new BookCategory("Akcja"));
 
         Book book = new Book("Testowa ksiazka", "Testowy tytul", 1931,
-                "8205236266999", categoryBookRepository.findByCategoryName("Powieść"));
+                "8205236266999", bookCategoryRepository.findByCategoryName("Powieść"));
         ResponseEntity<?> responseEntity = bookService.addBook(book);
 
         assertTrue(responseEntity.getStatusCode().is2xxSuccessful());
@@ -41,11 +41,11 @@ public class BooksTest {
     @Test
     @WithMockUser(username = "moderator", roles = {"MODERATOR"})
     void deleteBook() {
-        if (categoryBookRepository.findByCategoryName("Powieść") == null)
-            categoryBookRepository.save(new CategoryBook("Akcja"));
+        if (bookCategoryRepository.findByCategoryName("Powieść") == null)
+            bookCategoryRepository.save(new BookCategory("Akcja"));
 
         Book book = new Book("Testowa ksiazka", "Testowy tytul", 1931,
-                "8205236266999", categoryBookRepository.findByCategoryName("Powieść"));
+                "8205236266999", bookCategoryRepository.findByCategoryName("Powieść"));
         ResponseEntity<?> responseEntity = bookService.addBook(book);
 
         assertTrue(responseEntity.getStatusCode().is2xxSuccessful());

@@ -1,9 +1,9 @@
 package com.example.libraryproject.services;
 
 import com.example.libraryproject.Models.Book;
-import com.example.libraryproject.Models.CategoryBook;
+import com.example.libraryproject.Models.BookCategory;
+import com.example.libraryproject.Repository.BookCategoryRepository;
 import com.example.libraryproject.Repository.BookRepository;
-import com.example.libraryproject.Repository.CategoryBookRepository;
 import com.example.libraryproject.payload.response.MessageResponse;
 import lombok.SneakyThrows;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -31,50 +31,50 @@ public class BookService {
     private BookRepository bookRepository;
 
     @Autowired
-    private CategoryBookRepository categoryBookRepository;
+    private BookCategoryRepository bookCategoryRepository;
 
 
     @PostConstruct
     public void addPostBook() {
 
 
-        if (categoryBookRepository.findByCategoryName("Akcja") == null)
-            categoryBookRepository.save(new CategoryBook("Akcja"));
+        if (bookCategoryRepository.findByCategoryName("Akcja") == null)
+            bookCategoryRepository.save(new BookCategory("Akcja"));
 
-        if (categoryBookRepository.findByCategoryName("Powieść") == null)
-            categoryBookRepository.save(new CategoryBook("Powieść"));
+        if (bookCategoryRepository.findByCategoryName("Powieść") == null)
+            bookCategoryRepository.save(new BookCategory("Powieść"));
 
-        if (categoryBookRepository.findByCategoryName("Science-Fiction") == null)
-            categoryBookRepository.save(new CategoryBook("Science-Fiction"));
+        if (bookCategoryRepository.findByCategoryName("Science-Fiction") == null)
+            bookCategoryRepository.save(new BookCategory("Science-Fiction"));
 
-        if (categoryBookRepository.findByCategoryName("Thriller") == null)
-            categoryBookRepository.save(new CategoryBook("Thriller"));
+        if (bookCategoryRepository.findByCategoryName("Thriller") == null)
+            bookCategoryRepository.save(new BookCategory("Thriller"));
 
-        if (categoryBookRepository.findByCategoryName("Dramat") == null)
-            categoryBookRepository.save(new CategoryBook("Dramat"));
+        if (bookCategoryRepository.findByCategoryName("Dramat") == null)
+            bookCategoryRepository.save(new BookCategory("Dramat"));
 
-        if (categoryBookRepository.findByCategoryName("Kryminał") == null)
-            categoryBookRepository.save(new CategoryBook("Kryminał"));
+        if (bookCategoryRepository.findByCategoryName("Kryminał") == null)
+            bookCategoryRepository.save(new BookCategory("Kryminał"));
 
-        if (categoryBookRepository.findByCategoryName("Komedia") == null)
-            categoryBookRepository.save(new CategoryBook("Komedia"));
+        if (bookCategoryRepository.findByCategoryName("Komedia") == null)
+            bookCategoryRepository.save(new BookCategory("Komedia"));
 
 
         if (bookRepository.findAll().isEmpty()) {
-            bookRepository.save(new Book("W pustyni i w puszczy", "Henryk Sienkiewicz", 1911,
-                    "8205236266118", categoryBookRepository.findByCategoryName("Powieść")));
-            bookRepository.save(new Book("Zbrodnia i kara", "Fiodor Dostojewski", 1866,
-                    "1732659511374", categoryBookRepository.findByCategoryName("Kryminał")));
-            bookRepository.save(new Book("Lalka", "Bolesław Prus", 1889,
-                    "3464671469218", categoryBookRepository.findByCategoryName("Powieść")));
-            bookRepository.save(new Book("Wesele", "Stanisław Wyspiański", 1901,
-                    "6090851170392", categoryBookRepository.findByCategoryName("Dramat")));
-            bookRepository.save(new Book("Hamlet", "William Shakespeare", 1901,
-                    "2686765240001", categoryBookRepository.findByCategoryName("Dramat")));
-            bookRepository.save(new Book("Kamienie na Szaniec", "Aleksander Kamiński",
-                    1943, "1569634489760", categoryBookRepository.findByCategoryName("Akcja")));
-            bookRepository.save(new Book("Balladyna", "Juliusz Słowacki", 1839,
-                    "4440014035818", categoryBookRepository.findByCategoryName("Dramat")));
+            bookRepository.save(new Book("Wielka wyprawa księcia Racibora", "Artur Szreiter", 1911,
+                    "8205236266118", 7, bookCategoryRepository.findByCategoryName("Powieść")));
+            bookRepository.save(new Book("Zaginione królestwa", "Norman Davies", 1866,
+                    "1732659511374", bookCategoryRepository.findByCategoryName("Kryminał")));
+            bookRepository.save(new Book("Pod pogańskim sztandarem", "Artur Szreiter", 1889,
+                    "3464671469218", bookCategoryRepository.findByCategoryName("Powieść")));
+            bookRepository.save(new Book("Zdobywcy", "Roger Crowley", 1901,
+                    "6090851170392", bookCategoryRepository.findByCategoryName("Dramat")));
+            bookRepository.save(new Book("Bohaterowie Słowian Połabskich", "Jerzy Strzelczyk", 1901,
+                    "2686765240001", bookCategoryRepository.findByCategoryName("Dramat")));
+            bookRepository.save(new Book("Zabójcze układy", "Przemysław Gasztold",
+                    1943, "1569634489760", bookCategoryRepository.findByCategoryName("Akcja")));
+            bookRepository.save(new Book("Data science od podstaw", "Josel Grus", 1839,
+                    "4440014035818", bookCategoryRepository.findByCategoryName("Dramat")));
 
             try {
 
@@ -87,9 +87,15 @@ public class BookService {
     }
 
     public ResponseEntity<?> addBook(Book book) {
+
+        if (book.getBookCategory() == null) {
+            book.setBookCategory(bookCategoryRepository.findByCategoryName("Akcja"));
+        }
+
         if (bookRepository.existsByISBN(book.getISBN())) {
             Book id = bookRepository.findByISBN(book.getISBN()).orElseThrow(() -> null);
-            if (id.getBookName().equals(book.getBookName()) && id.getAuthor().equals(book.getAuthor()) && id.getYearOfPublication() == book.getYearOfPublication()) {
+            if (id.getBookName().equals(book.getBookName()) && id.getAuthor().equals(book.getAuthor())
+                    && id.getYearOfPublication() == book.getYearOfPublication()) {
 
                 bookRepository.addBookCapacity(book.getCapacity(), id.getIdBook());
                 return ResponseEntity
@@ -103,8 +109,8 @@ public class BookService {
             }
 
         } else {
-            CategoryBook byCategoryName = categoryBookRepository.findByCategoryName(book.getCategoryBook().getCategoryName());
-            book.setCategoryBook(byCategoryName);
+            BookCategory byCategoryName = bookCategoryRepository.findByCategoryName(book.getBookCategory().getCategoryName());
+            book.setBookCategory(byCategoryName);
             bookRepository.save(book);
             return ResponseEntity
                     .ok(new MessageResponse("Poprawnie udało się dodać nową książkę!"));
@@ -173,7 +179,8 @@ public class BookService {
     }
 
     public List<Book> getBooks(int capacity) {
-        return bookRepository.findByCapacityGreaterThan(capacity);
+
+        return bookRepository.findByCapacityGreaterThanOrderByIdBookDesc(capacity);
     }
 
     public List<Book> getFilterBooks(String name) {
@@ -185,9 +192,9 @@ public class BookService {
     }
 
     public List<Book> getBooksByCategory(String category) {
-        CategoryBook categoryName = categoryBookRepository.findByCategoryName(category);
+        BookCategory categoryName = bookCategoryRepository.findByCategoryName(category);
 
-        return bookRepository.findByCategoryBook(categoryName);
+        return bookRepository.findByBookCategory(categoryName);
     }
 
     public List<Book> getFilterBooksByCategory(String category, String filterName) {
@@ -196,8 +203,8 @@ public class BookService {
         return booksByCategory.stream().filter(book -> book.getBookName().toLowerCase().contains(filterName)).toList();
     }
 
-    public List<CategoryBook> getCategoriesBookName() {
-        return categoryBookRepository.findAll();
+    public List<BookCategory> getCategoriesBookName() {
+        return bookCategoryRepository.findAll();
     }
 
     ;

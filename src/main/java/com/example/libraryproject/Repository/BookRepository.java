@@ -1,7 +1,7 @@
 package com.example.libraryproject.Repository;
 
 import com.example.libraryproject.Models.Book;
-import com.example.libraryproject.Models.CategoryBook;
+import com.example.libraryproject.Models.BookCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,18 +13,22 @@ import java.util.Optional;
 
 
 @Repository
-public interface BookRepository extends JpaRepository <Book, Long> {
+public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Override
     Optional<Book> findById(Long idBook);
 
     Optional<Book> findByISBN(String isbn);
+
     Boolean existsByISBN(String ISBN);
 
     List<Book> findByBookNameContainsIgnoreCase(String name);
+
     List<Book> findByCapacityGreaterThan(int capacity);
 
-    List<Book> findByCategoryBook(CategoryBook categoryBook);
+    List<Book> findByCapacityGreaterThanOrderByIdBookDesc(int capacity);
+
+    List<Book> findByBookCategory(BookCategory bookCategory);
 
     @Modifying
     @Transactional

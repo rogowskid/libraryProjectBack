@@ -1,7 +1,7 @@
 package com.example.libraryproject.controllers;
 
 import com.example.libraryproject.Models.Book;
-import com.example.libraryproject.Models.CategoryBook;
+import com.example.libraryproject.Models.BookCategory;
 import com.example.libraryproject.services.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -77,7 +77,7 @@ public class BookController {
     }
 
     @GetMapping("/getallcategories")
-    public List<CategoryBook> getCategoriesBook() {
+    public List<BookCategory> getCategoriesBook() {
         return bookService.getCategoriesBookName();
     }
 
